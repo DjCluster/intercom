@@ -5,6 +5,7 @@
 #               -samples per have to be multiply of 8
 #Version history
 
+#1.4 - Milestone - Pre-Release 
 #1.3 - Added code comments
 #1.2 - Cleaning up metods
 #1.1 - new structure for seperat channel sending
