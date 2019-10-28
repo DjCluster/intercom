@@ -66,9 +66,10 @@ class Intercom_bitplanes(Intercom_buffer):
             #sys.stderr.write("\n\nSND_MSG[{}]: {}".format(self.recorded_chunk_number,msg)); sys.stderr.flush()
             
             #Iterate channels
-            for i in range(self.number_of_channels):
-                #Iterate Bitplanes
-                for b in range(15,-1,-1):
+
+            for b in range(15,-1,-1):
+                for i in range(self.number_of_channels):
+                    #Iterate Bitplanes                    
                     #Get bitplane "b" of channel "i"
                     bitplane=msg[:,i] >> b & 1
                     #Conversion bits to unsigned integer
