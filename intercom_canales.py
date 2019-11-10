@@ -46,8 +46,8 @@ class Intercom_canales(Intercom_bitplanes):
                     self.receive_and_buffer()
                     
     def record_send_and_play_compressed(self, indata, outdata, frames, time, status):
-        msg=np.frombuffer(indata, np.int16).reshape(self.frames_per_chunk, self.number_of_channels)
-        msg[:,1]=msg[:,1]-msg[:,0]
+        
+        msg=msg[:,1]-msg[:,0]
 
         for b in range(15,-1,-1):
             for i in range(self.number_of_channels):
@@ -59,7 +59,9 @@ class Intercom_canales(Intercom_bitplanes):
 
         self.recorded_chunk_number = (self.recorded_chunk_number + 1) % self.MAX_CHUNK_NUMBER    
         chunk = self._buffer[self.played_chunk_number % self.cells_in_buffer]
+        
         chunk[:,1] = chunk[:,1]+chunk[:,0]
+        
         self._buffer[self.played_chunk_number % self.cells_in_buffer] = self.generate_zero_chunk()
         self.played_chunk_number = (self.played_chunk_number + 1) % self.cells_in_buffer
         outdata[:] = chunk
