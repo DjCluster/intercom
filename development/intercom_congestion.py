@@ -1,6 +1,6 @@
 # Exploiting binaural redundancy.
 
-#Current Version 1.6 - status: working
+#Current Version 1.4 - status: working
 #Version history
 
 #1.4 - Implementación versión Mono
