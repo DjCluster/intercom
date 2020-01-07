@@ -71,8 +71,24 @@
 
 import struct
 import numpy as np
+import math
 from intercom import Intercom
 from intercom_empty import Intercom_empty
+import pywt as wt
+
+skip = 16
+
+# Number of samples to synthesize
+number_of_samples = 512
+
+# Number of levels of the DWT
+levels = 4
+
+# Wavelet used
+wavelet = 'bior3.5'
+
+#padding = "symmetric"
+padding = "periodization"
 
 if __debug__:
     import sys
@@ -81,6 +97,29 @@ class Intercom_DWT(Intercom_empty):
 
     def init(self, args):
         Intercom_empty.init(self, args)
+        self.samples = 0
+
+    def send(self, indata):
+            longitud = math.ceil(self.samples_per_chunk/self.number_of_channels/2)
+            #sys.stderr.write("\nLength: {}".format(longitud)); sys.stderr.flush()
+
+            canal_L=(indata[:,0]).flatten()
+            
+            for i in range(0,number_of_samples,skip):
+                coeffs=wt.wavedec(canal_L, wavelet=wavelet, level=levels, mode=padding)
+                
+                sys.stderr.write("\nCOEFFS: {}".format(coeffs[1])); sys.stderr.flush()
+            
+                arr, coeff_slices = wt.coeffs_to_array(coeffs)
+                arr[i]=number_of_samples
+                            
+                coeffs_from_arr = wt.array_to_coeffs(arr, coeff_slices, output_format="wavedec")
+                
+                
+
+                self.samples = wt.waverec(coeffs_from_arr, wavelet=wavelet, mode=padding)
+                
+            
 
 if __name__ == "__main__":
     intercom = Intercom_DWT()
