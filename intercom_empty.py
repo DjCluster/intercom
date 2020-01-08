@@ -51,11 +51,10 @@ class Intercom_empty(Intercom_DFC):
         magnitudes = abs(indata)
         indata = signs | magnitudes
         
-        self.NOBPTS = int(0.75*self.NOBPTS + 0.25*self.NORB)
+        #Sum empty bitplanes to total bitplanes received for congestion calculation.
+        self.NOBPTS = int(0.75*self.NOBPTS + (0.25*(self.NORB + self.empty)))
         self.NOBPTS += 1
-        #Sum empty bitplanes to total bitplanes to send for congestion calculation.
-        self.NOBPTS += self.empty
-
+        
         #If number of bitplanes to send is greater than the maximum or the number of empty bitplanes found is greater than 8, we nullify the congestion calculation for the current chunk (send all bitplanes).
         if (self.NOBPTS > self.max_NOBPTS) or (int(self.previous_empty//self.number_of_channels) > 8):
             self.NOBPTS = self.max_NOBPTS
