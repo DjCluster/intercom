@@ -8,6 +8,14 @@
 # number of bitplanes received equal to the real number of received
 # bitplanes plus the number of skipped bitplanes.
 
+#VERSION 1.3
+#STATUS: WORKING
+#
+#1.3 - Revision of comments
+#1.2 - Optimization (np.any) and check for 8 or fewer bitplanes
+#1.1 - Implementation of solution
+#1.0 - Creation of case
+
 import struct
 import numpy as np
 from intercom import Intercom
@@ -20,9 +28,9 @@ class Intercom_empty(Intercom_DFC):
 
     def init(self, args):
         Intercom_DFC.init(self, args)
-        #We create a new variable to count the bitplanes that are empty.
+        #Create counter for empty bitplanes found
         self.empty = 0
-        #We create a new variable to count the bitplanes that are empty in the previuos chunk.
+        #Variable for remembering last number of empty bitplanes
         self.previous_empty = 0
 
     def send_bitplane(self, indata, bitplane_number):
@@ -30,13 +38,12 @@ class Intercom_empty(Intercom_DFC):
         bitplane = bitplane.astype(np.uint8)
         bitplane = np.packbits(bitplane)
 
-        #We verify if the bitplane is empty. If it is, we return 1 to sum to the empty variable created before. If it isn't, we pack the bitplane and we send it.
+        #Check if it is an empty bitplane. If its empty increase counter, if not, send package
         if(np.any(bitplane)):
             message = struct.pack(self.packet_format, self.recorded_chunk_number, bitplane_number, self.received_bitplanes_per_chunk[(self.played_chunk_number+1) % self.cells_in_buffer]+1, *bitplane)
             self.sending_sock.sendto(message, (self.destination_IP_addr, self.destination_port))
             return 0
         else:
-            #sys.stderr.write("E"); sys.stderr.flush()
             return 1
 
     def send(self, indata):
@@ -46,22 +53,24 @@ class Intercom_empty(Intercom_DFC):
         
         self.NOBPTS = int(0.75*self.NOBPTS + 0.25*self.NORB)
         self.NOBPTS += 1
-        #We sum the bitplanes that are empty to the total of bitplanes thar are going to be send.
+        #Sum empty bitplanes to total bitplanes to send for congestion calculation.
         self.NOBPTS += self.empty
 
-        #If number of bitplanes to send is greater than the maximum or the number of empty bitplane for each chunk is grater than 8, we skip the congestion calculation for the current chunk.
+        #If number of bitplanes to send is greater than the maximum or the number of empty bitplanes found is greater than 8, we nullify the congestion calculation for the current chunk (send all bitplanes).
         if (self.NOBPTS > self.max_NOBPTS) or (int(self.previous_empty//self.number_of_channels) > 8):
             self.NOBPTS = self.max_NOBPTS
 
-        #We save the number of empty bitplane to use it in the next chunk.
+        #Save last counted bitplanes for considering in next chunk.
         self.previous_empty = self.empty
-        #We reset the variable.
+        #Reset empty bitplane counter.
         self.empty = 0
         last_BPTS = self.max_NOBPTS - self.NOBPTS - 1
         
-        #We increase the empty counter if the bitplane is empty.
+        #Send and check bitplanes of first two bitplanes
         self.empty += self.send_bitplane(indata, self.max_NOBPTS-1)
         self.empty += self.send_bitplane(indata, self.max_NOBPTS-2)
+
+        #Send and check resto of bitplanes considering congestion
         for bitplane_number in range(self.max_NOBPTS-3, last_BPTS, -1):
             self.empty += self.send_bitplane(indata, bitplane_number)
         self.recorded_chunk_number = (self.recorded_chunk_number + 1) % self.MAX_CHUNK_NUMBER
