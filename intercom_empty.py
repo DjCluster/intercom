@@ -8,9 +8,10 @@
 # number of bitplanes received equal to the real number of received
 # bitplanes plus the number of skipped bitplanes.
 
-#VERSION 1.3
+#VERSION 1.4
 #STATUS: WORKING
 #
+#1.4 - Fix error in congestion calculation
 #1.3 - Revision of comments
 #1.2 - Optimization (np.any) and check for 8 or fewer bitplanes
 #1.1 - Implementation of solution
@@ -51,11 +52,11 @@ class Intercom_empty(Intercom_DFC):
         magnitudes = abs(indata)
         indata = signs | magnitudes
         
-        #Sum empty bitplanes to total bitplanes received for congestion calculation.
+        #Sum empty bitplanes to total bitplanes received (NORB) for congestion calculation.
         self.NOBPTS = int(0.75*self.NOBPTS + (0.25*(self.NORB + self.empty)))
         self.NOBPTS += 1
         
-        #If number of bitplanes to send is greater than the maximum or the number of empty bitplanes found is greater than 8, we nullify the congestion calculation for the current chunk (send all bitplanes).
+        #If number of bitplanes to send is greater than the maximum or the number of empty bitplanes found is greater than 8 (working case 16 bit), we nullify the congestion calculation for the current chunk (send all bitplanes).
         if (self.NOBPTS > self.max_NOBPTS) or (int(self.previous_empty//self.number_of_channels) > 8):
             self.NOBPTS = self.max_NOBPTS
 
