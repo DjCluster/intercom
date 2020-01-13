@@ -52,7 +52,7 @@ class Intercom_empty(Intercom_DFC):
         magnitudes = abs(indata)
         indata = signs | magnitudes
         
-        #Sum empty bitplanes to total bitplanes received (NORB) for congestion calculation.
+        #Sum empty bitplanes to total bitplanes received (NORB) for congestion calculation and calc congestion
         self.NOBPTS = int(0.75*self.NOBPTS + (0.25*(self.NORB + self.empty)))
         self.NOBPTS += 1
         
@@ -66,11 +66,11 @@ class Intercom_empty(Intercom_DFC):
         self.empty = 0
         last_BPTS = self.max_NOBPTS - self.NOBPTS - 1
         
-        #Send and check bitplanes of first two bitplanes
+        #Send and check first two bitplanes
         self.empty += self.send_bitplane(indata, self.max_NOBPTS-1)
         self.empty += self.send_bitplane(indata, self.max_NOBPTS-2)
 
-        #Send and check resto of bitplanes considering congestion
+        #Send and check rest of bitplanes considering congestion
         for bitplane_number in range(self.max_NOBPTS-3, last_BPTS, -1):
             self.empty += self.send_bitplane(indata, bitplane_number)
         self.recorded_chunk_number = (self.recorded_chunk_number + 1) % self.MAX_CHUNK_NUMBER
