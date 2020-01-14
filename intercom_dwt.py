@@ -14,7 +14,7 @@
 # chunks.
 
 # !!! INFO !!!
-# !! after 2 secondes some noise for 3 seconds !!
+# !! after 2 seconds some noise for 3 seconds !!
 # BEST results:
 # WINDOWS: -s 8192 -cb 8
 # LINUX: -s (bigger_than_2048) -cb (16 or 32)
