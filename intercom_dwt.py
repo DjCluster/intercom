@@ -20,6 +20,7 @@
 # LINUX: -s (bigger_than_2048) -cb (16 or 32)
 
 #VERSION 1.4 - STATUS WORKING (only 4 levels of DWT [array size problem])
+# 1.5 - revision comments and changes bitplane cutting formula
 # 1.4 - comments and code description
 # 1.3 - revision and cleanup form code, dynamic array caclulation
 # 1.2 - implementes empty plane consideration and precision factor
@@ -116,7 +117,7 @@ class Intercom_DWT(Intercom_empty):
 
             #Check if overlap mode
             if(overlap>0):
-                bitplane = bitplane[:-(overlap//2)]
+                bitplane = bitplane[:-(len(bitplane)-len(self.arr_empty))]
 
             #Write received bitplane to coefficient buffer
             self._buffer_coeffs[received_chunk_number % self.cells_in_buffer][:, received_bitplane_number%self.number_of_channels] |= (bitplane << received_bitplane_number//self.number_of_channels)
@@ -165,14 +166,13 @@ class Intercom_DWT(Intercom_empty):
             #Reset empty bitplanes
             self.skipped_bitplanes[(self.played_chunk_number+1) % self.cells_in_buffer] = 0
             #Recover congestion
-            self.NOBPTS += 4
+            self.NOBPTS += 2
 
             #Failover for range of MAXBPTS 
             if self.NOBPTS > self.max_NOBPTS:
                 self.NOBPTS = self.max_NOBPTS
                 
             last_BPTS = self.max_NOBPTS - self.NOBPTS - 1
-            #last_BPTS = -1
 
             #start creating coefficient arrays for sending
             for ch in range (self.number_of_channels):
