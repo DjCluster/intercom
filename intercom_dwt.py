@@ -19,7 +19,8 @@
 # WINDOWS: -s 8192 -cb 8
 # LINUX: -s (bigger_than_2048) -cb (16 or 32)
 
-#VERSION 1.4 - STATUS WORKING (only 4 levels of DWT [array size problem])
+#VERSION 1.6 - STATUS WORKING (only 4 levels of DWT [array size problem])
+# 1.6 - FIX: minor error in congestion calculation and bitplane for loop
 # 1.5 - revision comments and changes bitplane cutting formula
 # 1.4 - comments and code description
 # 1.3 - revision and cleanup form code, dynamic array caclulation
@@ -150,9 +151,7 @@ class Intercom_DWT(Intercom_empty):
             #calc new indata if overlapping is active
             if(overlap>0):
                 newindata = np.append(self._last[-(overlap//2):],self._current,axis=0)
-                #sys.stderr.write("\nNEWIN1 [{}]".format(newindata)); sys.stderr.flush()
                 newindata = np.append(newindata,self._next[:+(overlap//2)],axis=0)
-                #sys.stderr.write("\nNEWIN2 [{}]".format(newindata)); sys.stderr.flush() 
                 
             #Transformation of sign & magnitude
             signs = newindata & 0x8000
@@ -161,8 +160,7 @@ class Intercom_DWT(Intercom_empty):
 
             #Calculation of congestion, consider empty planes 
             self.NOBPTS = int(0.75*self.NOBPTS + 0.25*(self.NORB + self.skipped_bitplanes[(self.played_chunk_number+1) % self.cells_in_buffer]))
-            self.NOBPTS += self.skipped_bitplanes[(self.played_chunk_number+1) % self.cells_in_buffer]
-
+            
             #Reset empty bitplanes
             self.skipped_bitplanes[(self.played_chunk_number+1) % self.cells_in_buffer] = 0
             #Recover congestion
@@ -188,7 +186,7 @@ class Intercom_DWT(Intercom_empty):
             self.send_bitplane(self.arr_temp, self.max_NOBPTS-2)
 
             #Send rest depending of congestion
-            for bitplane_number in range(self.max_NOBPTS-1, last_BPTS, -1):
+            for bitplane_number in range(self.max_NOBPTS-3, last_BPTS, -1):
                 self.send_bitplane(self.arr_temp, bitplane_number)
 
             #Refresh recorded chunk number
