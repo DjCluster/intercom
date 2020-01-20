@@ -35,7 +35,7 @@ from intercom import Intercom
 from intercom_empty import Intercom_empty
 import pywt as wt
 
-# Number of levels of the DWT (DO NOT CHANGE!)
+# Number of levels of the DWT
 levels = 4
 
 # Set wavelet to use
