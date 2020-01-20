@@ -19,7 +19,7 @@
 # WINDOWS: -s 8192 -cb 8
 # LINUX: -s (bigger_than_2048) -cb (16 or 32)
 
-#VERSION 1.6 - STATUS WORKING (only 4 levels of DWT [array size problem])
+#VERSION 1.6 - STATUS WORKING
 # 1.6 - FIX: minor error in congestion calculation and bitplane for loop
 # 1.5 - revision comments and changes bitplane cutting formula
 # 1.4 - comments and code description
